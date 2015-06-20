@@ -48,8 +48,8 @@ class Philosopher implements Runnable {
 
     public void run() {
         try {
-            this.latch.countDown();
-            this.latch.await();
+            latch.countDown();
+            latch.await();
             int mealsEaten = 0;
             while (mealsEaten < maxEats) {
                 eat(mealsEaten);
@@ -64,17 +64,17 @@ class Philosopher implements Runnable {
     protected void eat(int mealsEaten) throws InterruptedException {
         lock.lockInterruptibly();
         try {
-            while (this.left != null && this.right == null) {
+            while (left != null && right == null) {
                 condition.await(100, TimeUnit.MILLISECONDS);
-                if (this.right == null) {
-                    this.right = this.rightPhilosopher.getLeftFork();
+                if (right == null) {
+                    right = rightPhilosopher.getLeftFork();
                 }
             }
-            if (this.left == null) {
-                this.left = this.leftPhilosopher.getRightFork();
+            if (left == null) {
+                left = leftPhilosopher.getRightFork();
             }
-            if (this.right == null) {
-                this.right = this.rightPhilosopher.getLeftFork();
+            if (right == null) {
+                right = rightPhilosopher.getLeftFork();
             }
             System.out.println("Philosopher " + id + " eating meal #" + (mealsEaten + 1));
             left.use();
@@ -93,10 +93,10 @@ class Philosopher implements Runnable {
         return getFork(false);
     }
 
-    private Fork getFork(boolean isLeft) throws InterruptedException {
-        final Fork fork = isLeft ? this.left : this.right;
+    private Fork getFork(final boolean isLeft) throws InterruptedException {
         lock.lockInterruptibly();
         try {
+            final Fork fork = isLeft ? left : right;
             if (isLeft) {
                 left = null;
             } else {
