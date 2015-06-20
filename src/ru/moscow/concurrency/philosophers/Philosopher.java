@@ -38,14 +38,6 @@ class Philosopher implements Runnable {
         this.id = id;
     }
 
-    public void setLeft(Fork left) {
-        this.left = left;
-    }
-
-    public void setRight(Fork right) {
-        this.right = right;
-    }
-
     public void setLeftPhilosopher(Philosopher leftPhilosopher) {
         this.leftPhilosopher = leftPhilosopher;
     }
@@ -59,8 +51,7 @@ class Philosopher implements Runnable {
             this.latch.countDown();
             this.latch.await();
             int mealsEaten = 0;
-            while (mealsEaten < this.maxEats) {
-                //    randomSleep();
+            while (mealsEaten < maxEats) {
                 eat(mealsEaten);
                 mealsEaten++;
             }
@@ -79,20 +70,15 @@ class Philosopher implements Runnable {
                     this.right = this.rightPhilosopher.getLeftFork();
                 }
             }
-
             if (this.left == null) {
                 this.left = this.leftPhilosopher.getRightFork();
             }
-
             if (this.right == null) {
                 this.right = this.rightPhilosopher.getLeftFork();
             }
-
             System.out.println("Philosopher " + id + " eating meal #" + (mealsEaten + 1));
-            //randomSleep();
-            this.left.use();
-            this.right.use();
-
+            left.use();
+            right.use();
         } finally {
             lock.unlock();
         }
@@ -108,17 +94,16 @@ class Philosopher implements Runnable {
     }
 
     private Fork getFork(boolean isLeft) throws InterruptedException {
+        final Fork fork = isLeft ? this.left : this.right;
         lock.lockInterruptibly();
         try {
-            final Fork fork = isLeft ? this.left : this.right;
-
             if (isLeft) {
-                this.left = null;
+                left = null;
             } else {
-                this.right = null;
+                right = null;
             }
             fork.wash();
-            this.condition.signalAll();
+            condition.signalAll();
             return fork;
         } finally {
             lock.unlock();
